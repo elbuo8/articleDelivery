@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+  <head>
+    <meta charset="utf-8">
+    <title>RADeli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- Le styles -->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <style>
+      body { padding-top: 60px; /* 60px to make the container go all the way
+      to the bottom of the topbar */ }
+    </style>
+    <link href="assets/css/bootstrap-responsive.css" rel="stylesheet">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js">
+      </script>
+    <![endif]-->
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="assets/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="assets/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="assets/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="assets/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="assets/ico/apple-touch-icon-57-precomposed.png">
+    <style>
+    </style>
+	 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script src="socket.io/socket.io.js"></script>
+	<script>
+	var socket = io.connect();
+	function addArticle () {
+		var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+		var urlReg = /^([a-z]([a-z]|\d|\+|-|\.)*):(\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?((\[(|(v[\da-f]{1,}\.(([a-z]|\d|-|\.|_|~)|[!\$&'\(\)\*\+,;=]|:)+))\])|((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=])*)(:\d*)?)(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*|(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)|((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)|((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)){0})(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i;
+		
+		
+		if($('#link').val() != "" & $('#title').val() != "" & $('#submitter').val() != "" & urlReg.test($('#link').val()) & emailReg.test($('#email').val())) {
+			$('form').fadeOut('slow');
+			var data = {
+				"title": $('#title').val(),
+				"link": $('#link').val(),
+				"submitter": $('#submitter').val(),
+				"reports": 0,
+				"email": $('#email').val(),
+				"twitterhandle": $('#twitter').val(),
+				"TTL": new Date()
+			}
+			socket.emit('addArticle', data);
+			socket.on('submissionResult', function (result) {
+				if(result.result) {
+					var parse = "<center><h1>Article Submitted! Thank You!</h1></center>";
+					$('div.content').html(parse);
+				}
+				else {
+					var parse = "<center><h1>Article NOT Submitted! </h1></center>";
+					$('div.content').html(parse);
+				}
+				
+			});
+		}
+		else
+			alert('Invalid parameters'); //make this nice.
+	}
+	</script>
+  </head>
+  
+  <body>
+    <div class="navbar navbar-fixed-top navbar-inverse">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="/">RADeli</a>
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+            <li><a href="/">Random( )</a></li>
+            <li class="divider-vertical"></li>
+            <li><a href="submit.html">Submit</a></li>
+            <li class="divider-vertical"></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="well">
+        <div>
+          <h1>Random Article Deli</h1>
+          <p>
+					<br>
+            Everytime you come, you will be greeted with a random technical article. You can submit your own as long as you keep it cool. Articles will only be served for a month. We want to keep the news fresh and rolling.
+          </p>
+        </div>
+      </div>
+      <div class="content">
+				<p><form onSubmit="addArticle();return false;" accept-charset="utf-8" class="navbar-form pull-left">
+					<input type="text" class="input-xxlarge" placeholder="Username" id="submitter"><br>
+					<input type="text" class="input-xxlarge" placeholder="Email" id="email"><br>
+					<input type="text" class="input-xxlarge" placeholder="Twitter" id="twitter"><br>
+					<input type="text" class="input-xxlarge" placeholder="Title of the article" id="title"><br>
+					<input type="text" class="input-xxlarge" placeholder="Link to article" id="link"><br><br>
+		  		<button type="onSubmit" class="btn">Submit</button>
+				</form></p>
+      </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="assets/js/bootstrap.js">
+    </script>
+  </body>
+
+</html>
